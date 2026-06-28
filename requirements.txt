@@ -5,3 +5,4 @@ Pillow
 requests
 beautifulsoup4
 sqlalchemy
+authlib
