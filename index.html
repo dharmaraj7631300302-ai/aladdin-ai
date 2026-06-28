@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aladdin AI | Agentic Dashboard</title>
+    <!-- Tailwind CSS for minimalist, mobile-friendly design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 3D Avatar Placeholder Styles */
+        .avatar-container {
+            background: linear-gradient(135deg, #1e3a8a, #9333ea);
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+            animation: breathe 4s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        /* Voice animation */
+        .listening { box-shadow: 0 0 15px 5px rgba(34, 197, 94, 0.6); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- LEFT PANEL: AI Chat & Avatar -->
+    <div class="flex-1 flex flex-col h-full border-r border-gray-700">
+        
+        <!-- Header & OAuth -->
+        <header class="p-4 flex justify-between items-center bg-gray-800 shadow-md">
+            <h1 class="text-2xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                Aladdin AI
+            </h1>
+            <div class="flex gap-2">
+                <button onclick="window.location.href='http://localhost:8000/auth/google'" class="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-sm transition">Google Login</button>
+                <button onclick="window.location.href='http://localhost:8000/auth/meta'" class="bg-blue-800 hover:bg-blue-700 px-3 py-1 rounded text-sm transition">Meta Login</button>
+            </div>
+        </header>
+
+        <!-- 3D Avatar Placeholder Container -->
+        <div class="h-1/3 w-full flex items-center justify-center bg-black relative">
+            <div id="avatar" class="avatar-container w-48 h-48 rounded-full border-4 border-gray-600 flex items-center justify-center shadow-2xl transition-all duration-300">
+                <span class="text-gray-300 text-sm italic">[ 3D Avatar Placeholder ]</span>
+            </div>
+        </div>
+
+        <!-- Chat History -->
+        <div id="chat-box" class="flex-1 p-4 overflow-y-auto bg-gray-900 space-y-4">
+            <div class="text-gray-400 text-center text-xs mt-2">Agent Session Initialized...</div>
+        </div>
+
+        <!-- Input & Voice Controls -->
+        <div class="p-4 bg-gray-800 flex items-center gap-3">
+            <button id="mic-btn" class="p-3 rounded-full bg-gray-700 hover:bg-green-600 transition-colors">
+                🎙️
+            </button>
+            <input type="text" id="chat-input" class="flex-1 bg-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type or speak commands...">
+            <button id="send-btn" class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded font-bold transition">Send</button>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Human-In-The-Loop & Fallbacks -->
+    <div class="w-full md:w-80 bg-gray-800 h-1/3 md:h-full flex flex-col border-t md:border-t-0 md:border-l border-gray-700 shadow-xl z-10">
+        <div class="p-4 bg-gray-900 font-bold border-b border-gray-700 flex justify-between items-center">
+            <span>Action Queue (HITL)</span>
+            <button onclick="fetchPendingActions()" class="text-xs bg-gray-700 px-2 py-1 rounded">Refresh</button>
+        </div>
+        <div id="pending-actions" class="flex-1 p-4 overflow-y-auto space-y-3">
+            <div class="text-sm text-gray-400 text-center">No pending actions.</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+  </html>
