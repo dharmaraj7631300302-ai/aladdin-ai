@@ -3,73 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aladdin AI | Agentic Dashboard</title>
-    <!-- Tailwind CSS for minimalist, mobile-friendly design -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>AI Automation Agent</title>
     <style>
-        /* 3D Avatar Placeholder Styles */
-        .avatar-container {
-            background: linear-gradient(135deg, #1e3a8a, #9333ea);
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
-            animation: breathe 4s ease-in-out infinite;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #000;
+            color: #e4e4e7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
         }
-        @keyframes breathe {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        /* Mobile layout container */
+        .mobile-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            background-color: #121212;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #27272a;
+            border-right: 1px solid #27272a;
         }
-        /* Voice animation */
-        .listening { box-shadow: 0 0 15px 5px rgba(34, 197, 94, 0.6); }
+        
+        /* 1. Chat Box at the top */
+        #chat-box {
+            flex: 1; /* Takes remaining space to push everything else down */
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-bottom: 1px solid #27272a;
+        }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; line-height: 1.4; }
+        .msg.ai { background-color: #27272a; align-self: flex-start; border-bottom-left-radius: 2px;}
+        .msg.user { background-color: #2563eb; color: #fff; align-self: flex-end; border-bottom-right-radius: 2px;}
+
+        /* 2. Input Text Field + Send Button */
+        #input-section {
+            display: flex;
+            padding: 10px;
+            background-color: #18181b;
+            border-bottom: 1px solid #27272a;
+        }
+        #chat-input {
+            flex: 1;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            outline: none;
+        }
+        #send-btn {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 0 20px;
+            margin-left: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* 3. Permissions Section */
+        #permissions-section {
+            padding: 15px;
+            background-color: #121212;
+            border-bottom: 1px solid #27272a;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .section-title { font-size: 12px; text-transform: uppercase; color: #a1a1aa; margin-bottom: 5px; font-weight: 600; }
+        .perm-btn {
+            background: #18181b;
+            color: #d4d4d8;
+            border: 1px solid #3f3f46;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .perm-btn:active { background: #27272a; }
+
+        /* 4. Running Automations Dashboard */
+        #dashboard-section {
+            padding: 15px;
+            height: 250px;
+            overflow-y: auto;
+            background-color: #09090b;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #27272a; padding: 8px; text-align: left; }
+        th { background-color: #18181b; color: #a1a1aa; font-weight: normal;}
+        td { color: #d4d4d8; }
+        .status-badge { color: #34d399; }
     </style>
 </head>
-<body class="bg-gray-900 text-white font-sans h-screen flex flex-col md:flex-row overflow-hidden">
+<body>
 
-    <!-- LEFT PANEL: AI Chat & Avatar -->
-    <div class="flex-1 flex flex-col h-full border-r border-gray-700">
-        
-        <!-- Header & OAuth -->
-        <header class="p-4 flex justify-between items-center bg-gray-800 shadow-md">
-            <h1 class="text-2xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                Aladdin AI
-            </h1>
-            <div class="flex gap-2">
-                <button onclick="window.location.href='http://localhost:8000/auth/google'" class="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-sm transition">Google Login</button>
-                <button onclick="window.location.href='http://localhost:8000/auth/meta'" class="bg-blue-800 hover:bg-blue-700 px-3 py-1 rounded text-sm transition">Meta Login</button>
-            </div>
-        </header>
-
-        <!-- 3D Avatar Placeholder Container -->
-        <div class="h-1/3 w-full flex items-center justify-center bg-black relative">
-            <div id="avatar" class="avatar-container w-48 h-48 rounded-full border-4 border-gray-600 flex items-center justify-center shadow-2xl transition-all duration-300">
-                <span class="text-gray-300 text-sm italic">[ 3D Avatar Placeholder ]</span>
-            </div>
+    <div class="mobile-container">
+        <!-- 1. Chat Box -->
+        <div id="chat-box">
+            <div class="msg ai">Hello! I am your AI Automations Agent. What would you like to schedule today?</div>
         </div>
 
-        <!-- Chat History -->
-        <div id="chat-box" class="flex-1 p-4 overflow-y-auto bg-gray-900 space-y-4">
-            <div class="text-gray-400 text-center text-xs mt-2">Agent Session Initialized...</div>
+        <!-- 2. Input Field + Send -->
+        <div id="input-section">
+            <input type="text" id="chat-input" placeholder="e.g. Schedule a YouTube video for 5 AM..." onkeypress="handleKeyPress(event)">
+            <button id="send-btn" onclick="sendMessage()">Send</button>
         </div>
 
-        <!-- Input & Voice Controls -->
-        <div class="p-4 bg-gray-800 flex items-center gap-3">
-            <button id="mic-btn" class="p-3 rounded-full bg-gray-700 hover:bg-green-600 transition-colors">
-                🎙️
-            </button>
-            <input type="text" id="chat-input" class="flex-1 bg-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type or speak commands...">
-            <button id="send-btn" class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded font-bold transition">Send</button>
+        <!-- 3. Permissions Section -->
+        <div id="permissions-section">
+            <div class="section-title">Integrations & Permissions</div>
+            <button class="perm-btn" onclick="openOAuth('google-drive')">Submit Permission to Google Drive</button>
+            <button class="perm-btn" onclick="openOAuth('instagram')">Submit Permission to Instagram</button>
+            <button class="perm-btn" onclick="openOAuth('youtube')">Submit Permission to YouTube</button>
         </div>
-    </div>
 
-    <!-- RIGHT PANEL: Human-In-The-Loop & Fallbacks -->
-    <div class="w-full md:w-80 bg-gray-800 h-1/3 md:h-full flex flex-col border-t md:border-t-0 md:border-l border-gray-700 shadow-xl z-10">
-        <div class="p-4 bg-gray-900 font-bold border-b border-gray-700 flex justify-between items-center">
-            <span>Action Queue (HITL)</span>
-            <button onclick="fetchPendingActions()" class="text-xs bg-gray-700 px-2 py-1 rounded">Refresh</button>
-        </div>
-        <div id="pending-actions" class="flex-1 p-4 overflow-y-auto space-y-3">
-            <div class="text-sm text-gray-400 text-center">No pending actions.</div>
+        <!-- 4. Running Automations Dashboard -->
+        <div id="dashboard-section">
+            <div class="section-title">Running Automations Dashboard</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Automation Name/ID</th>
+                        <th>Execution Method</th>
+                        <th>Live Status/Logs</th>
+                    </tr>
+                </thead>
+                <tbody id="dashboard-body">
+                    <tr><td colspan="3" style="text-align: center; color: #71717a;">No automations running</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const chatBox = document.getElementById("chat-box");
+        const chatInput = document.getElementById("chat-input");
+        const dashboardBody = document.getElementById("dashboard-body");
+
+        function handleKeyPress(e) {
+            if (e.key === "Enter") sendMessage();
+        }
+
+        function appendMessage(text, sender) {
+            const div = document.createElement("div");
+            div.className = `msg ${sender}`;
+            div.innerText = text;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            appendMessage(text, "user");
+            chatInput.value = "";
+
+            try {
+                const response = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await response.json();
+                appendMessage(data.reply, "ai");
+            } catch (err) {
+                appendMessage("Error communicating with AI agent.", "ai");
+            }
+        }
+
+        function openOAuth(platform) {
+            // Opens a simulated pop-up window
+            window.open(`/oauth/${platform}`, 'OAuth', 'width=400,height=500,left=200,top=100');
+        }
+
+        async function pollAutomations() {
+            try {
+                const response = await fetch("/api/automations");
+                const data = await response.json();
+                const tasks = data.automations;
+
+                if (tasks.length === 0) return;
+
+                dashboardBody.innerHTML = ""; // Clear existing rows
+
+                tasks.forEach(task => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${task.id}</td>
+                        <td>${task.method}</td>
+                        <td class="status-badge">${task.status}</td>
+                    `;
+                    dashboardBody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Dashboard sync error:", err);
+            }
+        }
+
+        // Poll the backend every 2 seconds to update the Live Status/Logs
+        setInterval(pollAutomations, 2000);
+    </script>
 </body>
-  </html>
+</html>
