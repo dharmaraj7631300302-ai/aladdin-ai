@@ -83,6 +83,7 @@
             padding: 12px;
             border-radius: 6px;
             font-size: 14px;
+            cursor: pointer;
         }
         .connect-btn:active {
             background: #333;
@@ -109,18 +110,15 @@
 </head>
 <body>
 
-    <!-- चैट बॉक्स सेक्शन -->
     <div class="chat-container" id="chatBox">
         <div class="message ai-message">राम राम भाई! मैं आपका अलादीन एआई एजेंट हूँ। मुझे आप हिंदी में बताइए, जैसे: 'यूट्यूब पर वीडियो लगाओ 4 बजे' या 'फेसबुक पर रील अपलोड करो'।</div>
     </div>
 
-    <!-- इनपुट एरिया -->
     <div class="input-area">
         <input type="text" id="userInput" placeholder="यहाँ टाइप करें...">
         <button onclick="sendMessage()">Send</button>
     </div>
 
-    <!-- परमिशन बटन्स (यहाँ यूआरएल फिक्स कर दिया है) -->
     <div class="section-title">INTEGRATIONS & PERMISSIONS</div>
     <div class="btn-grid">
         <button class="connect-btn" onclick="connectPlatform('google')">🔗 Submit Permission to Google Drive</button>
@@ -129,7 +127,6 @@
         <button class="connect-btn" onclick="connectPlatform('facebook')">🔗 Submit Permission to Facebook Link</button>
     </div>
 
-    <!-- लाइव डैशबोर्ड -->
     <div class="section-title">RUNNING AUTOMATIONS DASHBOARD</div>
     <table>
         <thead>
@@ -147,7 +144,7 @@
     </table>
 
     <script>
-        // गलत यूआरएल का एरर यहाँ से ठीक हुआ है भाई
+        // सीधे बिना किसी बाहरी स्क्रिप्ट के पक्का काम करेगा
         function connectPlatform(platform) {
             window.open('/oauth/' + platform, '_blank', 'width=500,height=600');
         }
@@ -210,5 +207,4 @@
         setInterval(updateDashboard, 2000);
     </script>
 </body>
-    </html>
-    
+</html>
