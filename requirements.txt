@@ -1,10 +1,5 @@
 fastapi
 uvicorn
-python-multipart
-Pillow
-requests
-beautifulsoup4
-sqlalchemy
-authlib
-httpx
-itsdangerous
+jinja2
+apscheduler
+pydantic
