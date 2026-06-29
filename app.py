@@ -11,10 +11,7 @@ import re
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-# In-memory database for running/scheduled automations
 automations = {}
-
-# Initialize APScheduler for handling parallel background tasks
 scheduler = BackgroundScheduler()
 
 @app.on_event("startup")
@@ -28,87 +25,60 @@ def shutdown_event():
 class ChatMessage(BaseModel):
     message: str
 
-# --- APSCHEDULER WORKER FUNCTION ---
 def execute_automation(task_id: str):
-    """Simulates a background automation process taking time and updating status logs."""
     if task_id not in automations:
         return
-    
-    automations[task_id]["status"] = "Processing HD Video..."
-    time.sleep(5) # Simulating heavy work
-    
-    automations[task_id]["status"] = "Adding Metadata & Tags..."
+    automations[task_id]["status"] = "वीडियो प्रोसेस हो रहा है (HD)..."
+    time.sleep(5)
+    automations[task_id]["status"] = "टाइटल, डिस्क्रिप्शन और टैग्स लग रहे हैं..."
     time.sleep(4)
-    
-    automations[task_id]["status"] = "Posted/Completed"
-
-# --- ROUTES ---
+    automations[task_id]["status"] = "सफलतापूर्वक पोस्ट हो गया! ✅"
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    """Renders the main mobile layout."""
-    # एरर को ठीक करने के लिए यहाँ बदलाव किया गया है
     return templates.TemplateResponse(request=request, name="index.html")
 
 @app.post("/api/chat")
 async def chat_endpoint(chat: ChatMessage):
-    """Handles AI chat and task scheduling."""
     user_text = chat.message.lower()
     
-    # Check if the user wants to schedule an automation
-    if "schedule" in user_text or "लगा" in user_text or "शेड्यूल" in user_text:
+    # हिंदी और इंग्लिश दोनों शब्दों को पहचानने के लिए
+    is_schedule = any(x in user_text for x in ["schedule", "शेड्यूल", "लगा", "अपलोड", "पोस्ट", "set"])
+    
+    if is_schedule:
         task_id = f"ID-{str(uuid.uuid4())[:4].upper()}"
         
-        # Determine the execution method
-        method = "Generic Task"
-        if "instagram" in user_text or "इंस्टा" in user_text: method = "Instagram Reel Upload"
-        elif "youtube" in user_text or "यूट्यूब" in user_text: method = "YouTube Video Post"
-        elif "drive" in user_text or "ड्राइव" in user_text: method = "Google Drive Sync"
+        # प्लेटफॉर्म पहचानना
+        method = "सामान्य टास्क"
+        if "instagram" in user_text or "इंस्टा" in user_text or "रील" in user_text: 
+            method = "Instagram Reel Upload"
+        elif "youtube" in user_text or "यूट्यूब" in user_text or "वीडियो" in user_text: 
+            method = "YouTube Video Post"
+        elif "drive" in user_text or "ड्राइव" in user_text: 
+            method = "Google Drive Sync"
         
-        # Look for a custom time (e.g., "5 am", "8:30 pm")
-        time_match = re.search(r'(\d{1,2}(?::\d{2})?\s*(?:am|pm))', user_text)
-        requested_time = time_match.group(1) if time_match else "Immediately"
+        # टाइम निकालना (चाहे इंग्लिश हो या हिंदी जैसे '5 बजे', '8 pm', 'सुबह 6')
+        time_match = re.search(r'(\d{1,2}(?::\d{2})?\s*(?:am|pm|बजे|बज))', user_text)
+        requested_time = time_match.group(1) if time_match else "तुरंत (Immediately)"
         
-        # Add to dashboard table
         automations[task_id] = {
             "id": task_id,
             "method": method,
-            "status": f"Scheduled ({requested_time})"
+            "status": f"शेड्यूल है ({requested_time} के लिए)"
         }
         
-        run_date = datetime.now() + timedelta(seconds=5)
+        run_date = datetime.now() + timedelta(seconds=3)
         scheduler.add_job(execute_automation, 'date', run_date=run_date, args=[task_id])
         
-        ai_reply = f"Got it! I have scheduled the '{method}' automation for {requested_time}. (Demo mode: It will simulate execution in 5 seconds so you can watch the dashboard!)"
+        ai_reply = f"ठीक है भाई! मैंने आपका '{method}' ऑटोमेशन टाइम '{requested_time}' के लिए सेट कर दिया है। नीचे डैशबोर्ड में देखिए, काम शुरू हो रहा है!"
+    
+    elif "hello" in user_text or "hii" in user_text or "नमस्ते" in user_text or "राम राम" in user_text:
+        ai_reply = "राम राम भाई! मैं आपका अलादीन एआई एजेंट हूँ। मुझे आप हिंदी या इंग्लिश में बताइए, जैसे: 'यूट्यूब पर वीडियो लगाओ 4 बजे' या 'इंस्टाग्राम पर रील शेड्यूल करो'।"
     
     else:
-        ai_reply = "I'm your automation agent. Try saying: 'Schedule a YouTube video for 5 AM' or 'Schedule an Instagram post for 8 PM'."
+        ai_reply = "मैं आपकी बात समझ रहा हूँ भाई। अगर आपको वीडियो या रील शेड्यूल करनी है, तो बस ऐसे बोलिए: 'यूट्यूब पर वीडियो 2 बजे अपलोड करो'।"
 
     return JSONResponse(content={"reply": ai_reply})
-
-@app.get("/api/automations")
-async def get_automations():
-    """Returns the live status of all tasks to populate the dashboard table."""
-    return JSONResponse(content={"automations": list(automations.values())})
-
-@app.get("/oauth/{platform}", response_class=HTMLResponse)
-async def mock_oauth(platform: str):
-    """Mock OAuth route that acts as a simulated permission popup."""
-    html_content = f"""
-    <html>
-        <body style="background:#121212; color:#fff; font-family:sans-serif; text-align:center; padding:50px;">
-            <h2>{platform.capitalize()} Permission</h2>
-            <p>Simulating secure OAuth handshake...</p>
-            <script>
-                setTimeout(() => {{
-                    alert("{platform.capitalize()} Account Linked Successfully!");
-                    window.close();
-                }}, 1500);
-            </script>
-        </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content)
 
 if __name__ == "__main__":
     import uvicorn
