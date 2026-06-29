@@ -47,7 +47,8 @@ def execute_automation(task_id: str):
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     """Renders the main mobile layout."""
-    return templates.TemplateResponse("index.html", {"request": request})
+    # एरर को ठीक करने के लिए यहाँ बदलाव किया गया है
+    return templates.TemplateResponse(request=request, name="index.html")
 
 @app.post("/api/chat")
 async def chat_endpoint(chat: ChatMessage):
@@ -55,14 +56,14 @@ async def chat_endpoint(chat: ChatMessage):
     user_text = chat.message.lower()
     
     # Check if the user wants to schedule an automation
-    if "schedule" in user_text:
+    if "schedule" in user_text or "लगा" in user_text or "शेड्यूल" in user_text:
         task_id = f"ID-{str(uuid.uuid4())[:4].upper()}"
         
         # Determine the execution method
         method = "Generic Task"
-        if "instagram" in user_text: method = "Instagram Reel Upload"
-        elif "youtube" in user_text: method = "YouTube Video Post"
-        elif "drive" in user_text: method = "Google Drive Sync"
+        if "instagram" in user_text or "इंस्टा" in user_text: method = "Instagram Reel Upload"
+        elif "youtube" in user_text or "यूट्यूब" in user_text: method = "YouTube Video Post"
+        elif "drive" in user_text or "ड्राइव" in user_text: method = "Google Drive Sync"
         
         # Look for a custom time (e.g., "5 am", "8:30 pm")
         time_match = re.search(r'(\d{1,2}(?::\d{2})?\s*(?:am|pm))', user_text)
@@ -75,9 +76,6 @@ async def chat_endpoint(chat: ChatMessage):
             "status": f"Scheduled ({requested_time})"
         }
         
-        # APScheduler: In a real app, we'd schedule this for the requested time.
-        # For the sake of this live demo, we will trigger it 5 seconds from now 
-        # so the user can watch the dashboard update live!
         run_date = datetime.now() + timedelta(seconds=5)
         scheduler.add_job(execute_automation, 'date', run_date=run_date, args=[task_id])
         
@@ -91,7 +89,6 @@ async def chat_endpoint(chat: ChatMessage):
 @app.get("/api/automations")
 async def get_automations():
     """Returns the live status of all tasks to populate the dashboard table."""
-    # Convert dict to list for the frontend
     return JSONResponse(content={"automations": list(automations.values())})
 
 @app.get("/oauth/{platform}", response_class=HTMLResponse)
@@ -116,3 +113,4 @@ async def mock_oauth(platform: str):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    
